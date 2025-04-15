@@ -12,8 +12,10 @@ st.write("輸入任一上市公司代碼（如 AAPL、TSLA、2330.TW）來分析
 def cagr(start, end, periods):
     return (end / start)**(1/periods) - 1 if start > 0 else 0
 
-def safe_get(dataframe, column, fill_value=0):
-    return dataframe[column] if column in dataframe.columns else pd.Series([fill_value]*5)
+def cagr(start, end, periods):
+    if start is None or start == 0 or np.isnan(start) or np.isnan(end):
+        return 0
+    return (end / start)**(1/periods) - 1
 
 def standardize_series(series, target_len=5):
     values = series.dropna().iloc[::-1].values
