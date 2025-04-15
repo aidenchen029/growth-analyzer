@@ -102,11 +102,11 @@ def analyze_company(ticker):
             score -= 5
             analysis.append("❌ 自由現金流異常")
 
-        if np.nanmean(roe) > 0.1:
+        if np.any(~np.isnan(roe)) and np.nanmean(roe) > 0.1:
             analysis.append("✅ ROE 穩定高")
         else:
             score -= 5
-            analysis.append("❌ ROE 偏低")
+            analysis.append("❌ ROE 偏低或無資料")
 
         if d_to_e[-1] < 1.5:
             analysis.append("✅ 財務結構穩健")
