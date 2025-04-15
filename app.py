@@ -53,8 +53,10 @@ def analyze_company(ticker):
         fcf = cfo + capex
         roa = net_income / total_assets
         roe = net_income / shareholder_equity
-        interest_coverage = ebit / (-interest_expense)
-        d_to_e = (total_assets - shareholder_equity) / shareholder_equity
+
+        with np.errstate(divide='ignore', invalid='ignore'):
+            interest_coverage = np.where(interest_expense != 0, ebit / (-interest_expense), np.nan)
+            d_to_e = np.where(shareholder_equity != 0, (total_assets - shareholder_equity) / shareholder_equity, np.nan)
 
         score = 100
         analysis = []
