@@ -54,13 +54,12 @@ def analyze_company(ticker):
         revenue_cagr = cagr(revenue[0], revenue[-1], years)
         netincome_cagr = cagr(net_income[0], net_income[-1], years)
 
-        gross_margin = gross_profit / revenue
-        net_margin = net_income / revenue
-        fcf = cfo + capex
-        roa = net_income / total_assets
-        roe = net_income / shareholder_equity
-
         with np.errstate(divide='ignore', invalid='ignore'):
+            gross_margin = np.where(revenue != 0, gross_profit / revenue, np.nan)
+            net_margin = np.where(revenue != 0, net_income / revenue, np.nan)
+            fcf = cfo + capex
+            roa = np.where(total_assets != 0, net_income / total_assets, np.nan)
+            roe = np.where(shareholder_equity != 0, net_income / shareholder_equity, np.nan)
             interest_coverage = np.where(interest_expense != 0, ebit / (-interest_expense), np.nan)
             d_to_e = np.where(shareholder_equity != 0, (total_assets - shareholder_equity) / shareholder_equity, np.nan)
 
