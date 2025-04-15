@@ -122,14 +122,14 @@ def analyze_company(ticker):
             analysis.append("❌ 償債能力不足")
 
         try:
-            pe_ratio = info.get('trailingPE', None)
-            if pe_ratio and netincome_cagr != 0:
-                peg = pe_ratio / (netincome_cagr * 100)
-                analysis.append(f"📌 PEG 預期成長比：{peg:.2f}（越接近 1 越合理）")
-            else:
-                analysis.append("📌 PEG 無法計算（PE 缺失或成長率為 0）")
-        except:
-            analysis.append("📌 PEG 無法取得")
+    pe_ratio = info.get('trailingPE', None)
+    if pe_ratio is not None and netincome_cagr and abs(netincome_cagr) > 1e-6:
+        peg = pe_ratio / (netincome_cagr * 100)
+        analysis.append(f"📌 PEG 預期成長比：{peg:.2f}（越接近 1 越合理）")
+    else:
+        analysis.append("📌 PEG 無法計算（PE 缺失或成長率接近 0）")
+except:
+    analysis.append("📌 PEG 無法取得")
 
         st.subheader("📋 分析報告")
         for a in analysis:
