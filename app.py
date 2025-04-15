@@ -119,11 +119,11 @@ def analyze_company(ticker):
 
         try:
             pe_ratio = info.get('trailingPE', None)
-            if pe_ratio and netincome_cagr > 0:
+           if netincome_cagr != 0:
                 peg = pe_ratio / (netincome_cagr * 100)
                 analysis.append(f"📌 PEG 預期成長比：{peg:.2f}（越接近 1 越合理）")
             else:
-                analysis.append("📌 PEG 無法計算（可能缺 PE 或成長率為 0）")
+                analysis.append("📌 PEG 無法計算（淨利成長率為 0）")
         except:
             analysis.append("📌 PEG 無法取得")
 
