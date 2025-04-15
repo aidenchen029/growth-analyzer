@@ -15,6 +15,13 @@ def cagr(start, end, periods):
 def safe_get(dataframe, column, fill_value=0):
     return dataframe[column] if column in dataframe.columns else pd.Series([fill_value]*5)
 
+def standardize_series(series, target_len=5):
+    values = series.dropna().iloc[::-1].values
+    if len(values) >= target_len:
+        return values[:target_len]
+    else:
+        return np.pad(values, (0, target_len - len(values)), 'constant', constant_values=np.nan)
+
 def analyze_company(ticker):
     try:
         stock = yf.Ticker(ticker)
@@ -23,15 +30,15 @@ def analyze_company(ticker):
         balance_sheet = stock.balance_sheet.T
         info = stock.info
 
-        revenue = safe_get(financials, 'Total Revenue').dropna().iloc[::-1].values[:5]
-        net_income = safe_get(financials, 'Net Income').dropna().iloc[::-1].values[:5]
-        gross_profit = safe_get(financials, 'Gross Profit').dropna().iloc[::-1].values[:5]
-        cfo = safe_get(cashflow, 'Total Cash From Operating Activities').dropna().iloc[::-1].values[:5]
-        capex = safe_get(cashflow, 'Capital Expenditures').dropna().iloc[::-1].values[:5]
-        total_assets = safe_get(balance_sheet, 'Total Assets').dropna().iloc[::-1].values[:5]
-        shareholder_equity = safe_get(balance_sheet, 'Total Stockholder Equity').dropna().iloc[::-1].values[:5]
-        interest_expense = safe_get(financials, 'Interest Expense').dropna().iloc[::-1].values[:5]
-        ebit = safe_get(financials, 'EBIT').dropna().iloc[::-1].values[:5]
+        revenue = standardize_series(safe_get(financials, 'Total Revenue'))
+        net_income = standardize_series(safe_get(financials, 'Net Income'))
+        gross_profit = standardize_series(safe_get(financials, 'Gross Profit'))
+        cfo = standardize_series(safe_get(cashflow, 'Total Cash From Operating Activities'))
+        capex = standardize_series(safe_get(cashflow, 'Capital Expenditures'))
+        total_assets = standardize_series(safe_get(balance_sheet, 'Total Assets'))
+        shareholder_equity = standardize_series(safe_get(balance_sheet, 'Total Stockholder Equity'))
+        interest_expense = standardize_series(safe_get(financials, 'Interest Expense'))
+        ebit = standardize_series(safe_get(financials, 'EBIT'))
 
         if len(revenue) < 2 or len(net_income) < 2:
             st.error("❌ 主要財報資料不足，無法分析該公司。")
@@ -64,13 +71,13 @@ def analyze_company(ticker):
             score -= 10
             analysis.append(f"❌ 淨利 CAGR：{netincome_cagr:.2%}")
 
-        if np.all(np.diff(gross_margin) >= 0):
+        if np.all(np.diff(gross_margin[~np.isnan(gross_margin)]) >= 0):
             analysis.append("✅ 毛利率持續上升")
         else:
             score -= 5
             analysis.append("❌ 毛利率不穩")
 
-        if np.all(np.diff(net_margin) >= 0):
+        if np.all(np.diff(net_margin[~np.isnan(net_margin)]) >= 0):
             analysis.append("✅ 淨利率持續上升")
         else:
             score -= 5
@@ -88,7 +95,7 @@ def analyze_company(ticker):
             score -= 5
             analysis.append("❌ 自由現金流異常")
 
-        if roe.mean() > 0.1:
+        if np.nanmean(roe) > 0.1:
             analysis.append("✅ ROE 穩定高")
         else:
             score -= 5
