@@ -10,12 +10,12 @@ st.title("📈 公司成長潛力分析機器人")
 st.write("輸入任一上市公司代碼（如 AAPL、TSLA、2330.TW）來分析其過去五年財務數據與成長潛力。")
 
 def cagr(start, end, periods):
-    return (end / start)**(1/periods) - 1 if start > 0 else 0
-
-def cagr(start, end, periods):
     if start is None or start == 0 or np.isnan(start) or np.isnan(end):
         return 0
     return (end / start)**(1/periods) - 1
+
+def safe_get(df, column, default_value=0):
+    return df[column] if column in df.columns else pd.Series([default_value]*5)
 
 def standardize_series(series, target_len=5):
     values = series.dropna().iloc[::-1].values
@@ -144,7 +144,7 @@ def analyze_company(ticker):
     except Exception as e:
         st.error(f"❌ 發生錯誤：{e}")
 
-ticker_input = st.text_input("輸入公司代碼：", "TSLA")
+ticker_input = st.text_input("輸入公司代碼：", "AAPL")
 if st.button("分析公司"):
     with st.spinner("分析中..."):
         analyze_company(ticker_input)
