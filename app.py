@@ -11,7 +11,7 @@ st.write("輸入任一上市公司代碼（如 AAPL、TSLA、2330.TW）來分析
 
 def cagr(start, end, periods):
     try:
-        if periods == 0 or start in [0, None] or np.isnan(start) or np.isnan(end):
+        if periods == 0 or start is None or start == 0 or np.isnan(start) or np.isnan(end):
             return 0
         result = (end / start)**(1/periods) - 1
         return result if np.isfinite(result) else 0
@@ -122,14 +122,14 @@ def analyze_company(ticker):
             analysis.append("❌ 償債能力不足")
 
         try:
-    pe_ratio = info.get('trailingPE', None)
-    if pe_ratio is not None and netincome_cagr and abs(netincome_cagr) > 1e-6:
-        peg = pe_ratio / (netincome_cagr * 100)
-        analysis.append(f"📌 PEG 預期成長比：{peg:.2f}（越接近 1 越合理）")
-    else:
-        analysis.append("📌 PEG 無法計算（PE 缺失或成長率接近 0）")
-except:
-    analysis.append("📌 PEG 無法取得")
+            pe_ratio = info.get('trailingPE', None)
+            if pe_ratio is not None and netincome_cagr and abs(netincome_cagr) > 1e-6:
+                peg = pe_ratio / (netincome_cagr * 100)
+                analysis.append(f"📌 PEG 預期成長比：{peg:.2f}（越接近 1 越合理）")
+            else:
+                analysis.append("📌 PEG 無法計算（PE 缺失或成長率接近 0）")
+        except:
+            analysis.append("📌 PEG 無法取得")
 
         st.subheader("📋 分析報告")
         for a in analysis:
@@ -148,7 +148,7 @@ except:
     except Exception as e:
         st.error(f"❌ 發生錯誤：{e}")
 
-ticker_input = st.text_input("輸入公司代碼：", "AAPL")
+ticker_input = st.text_input("輸入公司代碼：", "TSLA")
 if st.button("分析公司"):
     with st.spinner("分析中..."):
         analyze_company(ticker_input)
